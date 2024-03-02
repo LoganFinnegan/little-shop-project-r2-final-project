@@ -1,6 +1,6 @@
 require 'rails_helper'
 
-RSpec.describe "Discounts#index", type: :feature do
+RSpec.describe "discount index", type: :feature do
   before(:each) do
     @cust_1 = create(:customer)
     @cust_2 = create(:customer)
@@ -40,25 +40,29 @@ RSpec.describe "Discounts#index", type: :feature do
 
     # 1: Merchant Bulk Discounts Index
   it "all discounts listed with their link to show page" do
-    # As a merchant
     # When I visit my merchant dashboard
     visit dashboard_merchant_path(@merch_1)
     # Then I see a link to view all my discounts
+    expect(page).to have_link("view merchant discounts")
     # When I click this link
-    click_link "All Discounts"
+    click_link "view merchant discounts"
     # Then I am taken to my bulk discounts index page
     expect(current_path).to eq(merchant_discounts_path(@merch_1))
-    # Where I see all of my bulk discounts including their
-    # percentage discount and quantity thresholds
-    # And each bulk discount listed includes a link to its show page
-    within '.all-discounts' do
+
+    within '.discounts' do
+      # Where I see all of my bulk discounts including their
       within "#discount-#{@discount_1.id}" do
+        # And each bulk discount listed includes a link to its show page\
         expect(page).to have_link("#{@discount_1.id}")
+        # percentage discount and quantity thresholds
         expect(page).to have_content(@discount_1.percent_discount)
         expect(page).to have_content(@discount_1.quantity_threshold)
       end
+
       within "#discount-#{@discount_2.id}" do
+        # And each bulk discount listed includes a link to its show page\
         expect(page).to have_link("#{@discount_2.id}")
+        # percentage discount and quantity thresholds
         expect(page).to have_content(@discount_2.percent_discount)
         expect(page).to have_content(@discount_2.quantity_threshold)
       end
@@ -66,23 +70,46 @@ RSpec.describe "Discounts#index", type: :feature do
   end
 
     # 2: Merchant Bulk Discount Create
-  it "" do
-    # As a merchant
+  it "can create a discount" do
     # When I visit my bulk discounts index
     visit merchant_discounts_path(@merch_1)
     # Then I see a link to create a new discount
-    click_link "Create a New Discount"
-    # When I click this link
+    within '.links' do
+        expect(page).to have_link("create a new discount")
+        # When I click this link
+        click_link("create a new discount")
+    end
     # Then I am taken to a new page where I see a form to add a new bulk discount
     expect(current_path).to eq(new_merchant_discount_path(@merch_1))
     # When I fill in the form with valid data
     fill_in "percent_discount", with: 40
     fill_in "quantity_threshold", with: 80
+
     click_button "Submit"
     # Then I am redirected back to the bulk discount index
     expect(current_path).to eq(merchant_discounts_path(@merch_1))
-    # And I see my new bulk discount listed
-    expect(page).to have_content("40")
-    expect(page).to have_content("80")
+    within '.discounts' do  
+      # And I see my new bulk discount listed
+      expect(page).to have_content("40")
+      expect(page).to have_content("80")
+    end
+  end
+
+  # 3: Merchant Bulk Discount Delete
+  it "can delete discounts" do 
+    # When I visit my bulk discounts index
+    visit merchant_discounts_path(@merch_1)
+    # Then next to each bulk discount I see a button to delete it
+    within "#discount-#{@discount_1.id}" do
+      expect(page).to have_content("delete discount")
+      # When I click this button
+      click_button("delete discount")
+    end
+    # Then I am redirected back to the bulk discounts index page
+    expect(current_path).to eq(merchant_discounts_path(@merch_1))
+    # And I no longer see the discount listed
+    within '.discounts' do  
+      expect(page).to_not have_link("#{@discount_1.id}")
+    end
   end
 end

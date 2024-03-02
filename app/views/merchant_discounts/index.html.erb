@@ -1,10 +1,15 @@
-<section class="all-discounts">
+<section class="links">
+  <%= link_to "create a new discount", new_merchant_discount_path(@merch), method: :get %>
+<section>
+
+<section class="discounts">
+  <h1> Discount(s) </h1> 
   <% @discounts.each do |discount| %>
     <div id="discount-<%= discount.id %>">
-      <%= link_to "#{discount.id}", merchant_discount_path(@merchant, discount) %>
-      <%= discount.percent_discount %>
-      <%= discount.quantity_threshold %>
+      <p>ID: <%= link_to "#{discount.id}", merchant_discount_path(@merch, discount) %></p>
+      <p>Discount: <%= discount.percent_discount %>%</p>
+      <p>Activation Threshold: <%= discount.quantity_threshold %></p>
+      <%= button_to "delete discount",  merchant_discount_path(@merch, discount), method: :delete %>
     </div>
   <% end %>
 </section>
-<%= link_to "Create a New Discount", new_merchant_discount_path(@merchant) %>
