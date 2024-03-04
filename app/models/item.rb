@@ -9,6 +9,7 @@ class Item < ApplicationRecord
   has_many :invoices, through: :invoice_items
   has_many :transactions, through: :invoices
   has_many :customers, through: :invoices
+  has_many :discounts, through: :merchant
 
   enum status: ["disabled", "enabled"]
 
@@ -41,5 +42,9 @@ class Item < ApplicationRecord
   def current_invoice_item(item, invoice)
     self.invoice_items
       .where(item_id: item.id, invoice_id: invoice.id).first
+  end
+
+  def has_discount_and_meets_threshold(item, invoice)
+    current_invoice_item(item, invoice).eligible_discount.present?
   end
 end

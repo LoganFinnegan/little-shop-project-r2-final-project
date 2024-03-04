@@ -1,6 +1,6 @@
 require 'rails_helper'
 
-RSpec.describe 'discount show', type: :feature do
+RSpec.describe 'discount edit', type: :feature do
   describe 'As a merchant' do
     before(:each) do
       @cust_1 = create(:customer)
@@ -41,46 +41,35 @@ RSpec.describe 'discount show', type: :feature do
       create(:invoice_item, item_id: @item_1.id, invoice_id: @invoice_6.id, unit_price: 1, quantity: 5)
     end
 
-    # 4: Merchant Bulk Discount Show
-    it 'displays discount attributes' do
+    # 5: Merchant Bulk Discount Edit
+    it "can edit a discount" do 
       # When I visit my bulk discount show page
       visit merchant_discount_path(@merch_1, @discount_1)
-      # Then I see the bulk discount's quantity threshold and percentage discount
+
+      within '.discount' do
+        # Then I see a link to edit the bulk discount
+        expect(page).to have_button("edit discount")
+        # When I click this link
+        click_button("edit discount")
+      end
+      # Then I am taken to a new page with a form to edit the discount
+      expect(current_path).to eq(edit_merchant_discount_path(@merch_1, @discount_1))
+      # And I see that the discounts current attributes are pre-poluated in the form
+      expect(page).to have_field("percent_discount")
+      expect(page).to have_field("quantity_threshold")
+      # When I change any/all of the information and click submit
+      fill_in 'percent_discount', with: '12'
+      fill_in 'quantity_threshold', with: '10'
+      
+      click_button("submit")
+      # Then I am redirected to the bulk discount's show page
+      expect(current_path).to eq(merchant_discount_path(@merch_1, @discount_1))
+      # And I see that the discount's attributes have been updated
       within '.discount' do
         expect(page).to have_content(@discount_1.id)
-        expect(page).to have_content(@discount_1.percent_discount)
-        expect(page).to have_content(@discount_1.quantity_threshold)
+        expect(page).to have_content("Discount: 12")
+        expect(page).to have_content("Threshold: 10")
       end
-    end
-
-    # 6: Merchant Invoice Show Page: Total Revenue and Discounted Revenue
-    it "it displays pre and post discount revenue" do 
-      # When I visit my merchant invoice show page
-      visit merchant_invoice_path(@merch_1, @invoice_1)
-      # Then I see the total revenue for my merchant from this invoice (not including discounts)
-      within '.pre-discount-revenue' do
-        expect(page).to have_content("Total Revenue: $1.00")
-      end
-      # And I see the total discounted revenue for my merchant from this invoice which includes bulk discounts in the calculation
-      within '.post-discount-revenue' do
-        expect(page).to have_content("Post Disocunt Revenue: $0.50")
-      end
-      # Note: We encourage you to use as much ActiveRecord as you can, but some Ruby is okay. Instead of a single query that sums the revenue of discounted items and the revenue of non-discounted items, we recommend creating a query to find the total discount amount, and then using Ruby to subtract that discount from the total revenue.
-      
-      # For an extra spicy challenge: try to find the total revenue of discounted and non-discounted items in one query! 
-    end
-
-    # 7: Merchant Invoice Show Page: Link to applied discounts
-    it "links to discounts" do 
-      # When I visit my merchant invoice show page
-      visit merchant_invoice_path(@merch_1, @invoice_1)
-      # Next to each invoice item I see a link to the show page for the bulk discount that was applied (if any)
-      within "#item-#{@item_1.id}" do
-        expect(page).to have_link("see discount")
-        click_link("see discount")
-      end
-
-      expect(current_path).to eq(merchant_discount_path(@merch_1, @discount_3))
     end
   end
 end

@@ -1,24 +1,39 @@
 <section class="invoice">
-  <h1><%=@invoice.id%></h1>
-  <p><%=@invoice.status%></p>
-  <p><%=@invoice.created_at.strftime('%A, %B, %d, %Y')%></p>
-  <p><%=@invoice.customer.first_name%> <%=@invoice.customer.last_name%></p>
+<h1><%=@invoice.id%></h1>
+<p><%=@invoice.status%></p>
+<p><%=@invoice.created_at.strftime('%A, %B, %d, %Y')%></p>
+<p><%=@invoice.customer.first_name%> <%=@invoice.customer.last_name%></p>
+</section>
+
+<section class="pre-discount-revenue">
+<h2> Pre Discount Revenue </h2>
+<p>Total Revenue: <%= number_to_currency((@invoice.total_revenue_dollars), unit: "$")%></p>
+</section>
+
+<section class="post-discount-revenue">
+<h2> Post Discount Revenue </h2>
+<p>Post Disocunt Revenue: <%= number_to_currency((@invoice.disc_rev), unit: "$")%></p>
 </section>
 
 <section class="invoice-items">
-  <% @invoice.items.each do |item| %>
-  <div id="item-<%= item.id %>">
-    <h3><%= item.name %></h3>
-    <p><%= @invoice.total_revenue %></p>
-    <p><%= item.current_invoice_item(item, @invoice).quantity %></p>
-    <p><%= item.current_invoice_item(item, @invoice).unit_price %></p>
-    <p>Invoice Status: <%= item.current_invoice_item(item, @invoice).status %></p>
+<% @invoice.items.each do |item| %>
+<div id="item-<%= item.id %>">
+  <% current_ii = item.current_invoice_item(item, @invoice) %>
+  <h3>Item Name: <%= item.name %></h3>
+  <p>Pre discount Revenue: <%= @invoice.total_revenue %></p>
+  <p>Item Quantity: <%= current_ii.quantity %></p>
+  <p>Unit Price: <%= current_ii.unit_price %></p>
+  <p>Invoice Status: <%= current_ii.status %></p>
 
-    <%= form_with url:  merchant_item_path(item.merchant, item, invoice_id: @invoice.id), method: :patch, data: {turbo: false} do |f| %>
-        Status: <%= f.select "status", options_for_select([["Disabled", 0], ["Enabled", 1]]), value: item.status%>
-        <%= f.button "Update Item Status"  %>
-    <% end %>
+  <% if item.has_discount_and_meets_threshold(item, @invoice) %>
+    <p><%= link_to "see discount",  merchant_discount_path(item.merchant, current_ii.eligible_discount), method: :get %></p>
+  <% end %>  
 
+  <%= form_with url:  merchant_item_path(item.merchant, item, invoice_id: @invoice.id), method: :patch, data: {turbo: false} do |f| %>
+      Status: <%= f.select "status", options_for_select([["Disabled", 0], ["Enabled", 1]]), value: item.status%>
+      <%= f.button "Update Item Status"  %>
   <% end %>
+
+<% end %>
 </section>
 

@@ -6,6 +6,7 @@ class Invoice < ApplicationRecord
   has_many :invoice_items, dependent: :destroy
   has_many :items, through: :invoice_items
   has_many :merchants, through: :items
+  has_many :discounts, through: :merchants
 
   enum status: ["in progress", "cancelled", "completed"]
   
@@ -28,5 +29,30 @@ class Invoice < ApplicationRecord
   
   def total_revenue
     self.invoice_items.sum("unit_price * quantity")
+  end
+
+  def disc_rev
+    total_discounted_rev = 0
+    invoice_items.each do |ii|  
+      discount = ii.item.merchant.discounts
+        .where("quantity_threshold <= ?", ii.quantity)
+        .order(percent_discount: :desc)
+        .first
+
+      if discount
+        total_discounted_rev += calc_ii_total(ii) * calc_discount(discount)
+      else
+        total_discounted_rev += calc_ii_total(ii)
+      end
+    end
+    total_discounted_rev
+  end
+
+  def calc_ii_total(invoice_item)
+    invoice_item.unit_price * invoice_item.quantity / 100
+  end
+
+  def calc_discount(discount)
+    discount.percent_discount/100
   end
 end

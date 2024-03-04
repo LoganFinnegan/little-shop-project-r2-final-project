@@ -33,7 +33,10 @@ RSpec.describe Item, type: :model do
     create(:invoice_item, item_id: @test_item_4.id, invoice_id: @test_invoice_4.id, unit_price: 1, quantity: 100)
     create(:invoice_item, item_id: @test_item_5.id, invoice_id: @test_invoice_5.id, unit_price: 1, quantity: 1)
     create(:invoice_item, item_id: @test_item_6.id, invoice_id: @test_invoice_6.id, unit_price: 1, quantity: 500)
+
+    @discount_3 = @merch_2.discounts.create!(percent_discount: 50, quantity_threshold: 2)
   end
+
   describe 'Validations' do
     it { should validate_presence_of :name }
     it { should validate_presence_of :description }
@@ -43,6 +46,16 @@ RSpec.describe Item, type: :model do
   describe 'Relationships' do
     it { should belong_to :merchant }
     it { should have_many :invoice_items }
+    it { should have_many(:invoices).through(:invoice_items) }
+    it { should have_many(:transactions).through(:invoices) }
+    it { should have_many(:customers).through(:invoices) }
+    it { should have_many(:discounts).through(:merchant) }
+  end
+
+  describe 'Enums' do
+    it 'enums tests' do
+      should define_enum_for(:status).with_values(["disabled", "enabled"])
+    end
   end
 
   describe "class methods" do 
@@ -66,6 +79,11 @@ RSpec.describe Item, type: :model do
 
     it '#current_invoice_item' do
       expect(@test_item_1.current_invoice_item(@test_item_1, @test_invoice_1)).to eq(@ii_1)
+    end
+
+    it "#has_discount_and_meets_threshold(item, invoice)" do 
+      expect(@test_item_1.has_discount_and_meets_threshold(@test_item_1, @test_invoice_1)).to eq(true)
+      expect(@test_item_5.has_discount_and_meets_threshold(@test_item_5, @test_invoice_5)).to eq(false)
     end
   end
 end

@@ -5,10 +5,18 @@ class InvoiceItem < ApplicationRecord
   
   belongs_to :item
   belongs_to :invoice
+
   
   enum status: ["pending", "packaged", "shipped"]
 
   def unit_price_to_dollars
     unit_price/100.00
+  end
+
+  def eligible_discount
+    item.merchant.discounts
+      .where("quantity_threshold <= ?", self.quantity)
+      .order(percent_discount: :desc)
+      .first
   end
 end

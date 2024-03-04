@@ -10,6 +10,8 @@ RSpec.describe Invoice, type: :model do
     it { should have_many :transactions }
     it { should have_many :invoice_items }
     it { should have_many(:items).through(:invoice_items) }
+    it { should have_many(:merchants).through(:items) }
+    it { should have_many(:discounts).through(:merchants) }
   end
 
   describe 'Enums' do
@@ -110,6 +112,13 @@ RSpec.describe Invoice, type: :model do
       it "returns the correct revenue that an invoice will generate" do
         expect(@invoice_1.total_revenue_dollars).to eq(233.00)
         expect(@invoice_2.total_revenue_dollars).to eq(13.00)
+      end
+    end
+
+    describe '#disc_rev' do
+      it 'calculates the revenue after discounts' do
+        expect(@invoice_1.disc_rev).to eq(233)
+        expect(@invoice_2.disc_rev).to eq(13)
       end
     end
   end
