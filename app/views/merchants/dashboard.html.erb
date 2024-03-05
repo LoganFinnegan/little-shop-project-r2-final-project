@@ -1,5 +1,7 @@
 <%= render "shared/merchant_header", merchant: @merchant %>
 
+<%= link_to "view merchant discounts", merchant_discounts_path(@merchant), method: :get %>
+
 <section class="top-five">
   <h3> Top Five Customers </h3>
 
@@ -19,7 +21,6 @@
     </div>
   <% end %>
 </section>
-<%= link_to "view merchant discounts", merchant_discounts_path(@merchant), method: :get %>
 
 
 
