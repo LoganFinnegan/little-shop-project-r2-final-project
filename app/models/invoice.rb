@@ -38,7 +38,7 @@ class Invoice < ApplicationRecord
         .where("quantity_threshold <= ?", ii.quantity)
         .order(percent_discount: :desc)
         .first
-        
+
       if discount && discount.percent_discount < 100
         total += calc_ii_total(ii) * calc_discount(discount)
       elsif discount && discount.percent_discount >= 100
@@ -55,11 +55,11 @@ class Invoice < ApplicationRecord
   end
 
   def calc_discount(discount)
-    discount.percent_discount/100
+    (discount.percent_discount/100).round(2)
   end
 
   def cents_to_dollars
-    disc_rev/100
+    (disc_rev/100).round(2)
   end
 end
 
