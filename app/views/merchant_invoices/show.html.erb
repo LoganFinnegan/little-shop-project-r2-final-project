@@ -24,6 +24,7 @@
   <p>Item Quantity: <%= current_ii.quantity %></p>
   <p>Unit Price: <%= current_ii.unit_price %></p>
   <p>Invoice Status: <%= current_ii.status %></p>
+  <p>Item Status: <%= item.status %></p>
 
   <% if item.has_discount_and_meets_threshold(item, @invoice) %>
     <p><%= link_to "see discount",  merchant_discount_path(item.merchant, current_ii.eligible_discount), method: :get %></p>
