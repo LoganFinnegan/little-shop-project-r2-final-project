@@ -1,10 +1,10 @@
 <%= form_with url: merchant_discount_path(@merch, @discount), method: :patch, data: {turbo: false}, local: true do |f| %>
 
-  <%= f.label :percent, value: @discount.percent_discount %>
-  <%= f.number_field :percent_discount %>
+  <%= f.label :percent %>
+  <%= f.number_field :percent_discount, value: @discount.percent_discount %>
 
-  <%= f.label :threshold, value: @discount.quantity_threshold %>
-  <%= f.number_field :quantity_threshold %>
+  <%= f.label :threshold %>
+  <%= f.number_field :quantity_threshold, value: @discount.quantity_threshold %>
 
   <%= f.submit "submit"%>
 <% end %>
