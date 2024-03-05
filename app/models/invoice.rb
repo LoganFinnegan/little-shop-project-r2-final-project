@@ -32,20 +32,22 @@ class Invoice < ApplicationRecord
   end
 
   def disc_rev
-    total_discounted_rev = 0
+    total = 0
     invoice_items.each do |ii|  
       discount = ii.item.merchant.discounts
         .where("quantity_threshold <= ?", ii.quantity)
         .order(percent_discount: :desc)
         .first
-
-      if discount
-        total_discounted_rev += calc_ii_total(ii) * calc_discount(discount)
+        
+      if discount && discount.percent_discount < 100
+        total += calc_ii_total(ii) * calc_discount(discount)
+      elsif discount && discount.percent_discount >= 100
+        total += 0
       else
-        total_discounted_rev += calc_ii_total(ii)
+        total += calc_ii_total(ii)
       end
     end
-    total_discounted_rev
+    total
   end
 
   def calc_ii_total(invoice_item)
