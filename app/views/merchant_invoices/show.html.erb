@@ -7,12 +7,12 @@
 
 <section class="pre-discount-revenue">
 <h2> Pre Discount Revenue </h2>
-<p>Total Revenue: <%= number_to_currency((@invoice.total_revenue_dollars), unit: "$")%></p>
+<p>Total Revenue: $<%= @invoice.total_revenue_dollars %></p>
 </section>
 
 <section class="post-discount-revenue">
 <h2> Post Discount Revenue </h2>
-<p>Post Disocunt Revenue: <%= number_to_currency((@invoice.disc_rev), unit: "$")%></p>
+<p>Post Discount Revenue: $<%= @invoice.cents_to_dollars %></p>
 </section>
 
 <section class="invoice-items">
@@ -20,7 +20,7 @@
 <div id="item-<%= item.id %>">
   <% current_ii = item.current_invoice_item(item, @invoice) %>
   <h3>Item Name: <%= item.name %></h3>
-  <p>Pre discount Revenue: <%= @invoice.total_revenue %></p>
+  <p>Pre discount Revenue: $<%= @invoice.total_revenue_dollars %></p>
   <p>Item Quantity: <%= current_ii.quantity %></p>
   <p>Unit Price: <%= current_ii.unit_price %></p>
   <p>Invoice Status: <%= current_ii.status %></p>

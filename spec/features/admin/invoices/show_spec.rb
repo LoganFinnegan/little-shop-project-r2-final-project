@@ -100,7 +100,7 @@ RSpec.describe 'Admin Index Show', type: :feature do
       end
     end
 
-    # 8: Admin Invoice Show Page: Total Revenue and Discounted Revenue
+    #8 Admin Invoice Show Page: Total Revenue and Discounted Revenue
     it "can display total rev with and without discounts" do 
 
       cust_1 = create(:customer)

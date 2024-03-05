@@ -49,10 +49,15 @@ class Invoice < ApplicationRecord
   end
 
   def calc_ii_total(invoice_item)
-    invoice_item.unit_price * invoice_item.quantity / 100
+    invoice_item.unit_price * invoice_item.quantity
   end
 
   def calc_discount(discount)
     discount.percent_discount/100
   end
+
+  def cents_to_dollars
+    disc_rev/100
+  end
 end
+

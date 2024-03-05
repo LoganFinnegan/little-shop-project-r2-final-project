@@ -77,9 +77,7 @@ RSpec.describe Invoice, type: :model do
   describe 'Class Methods' do
     describe '#invoices_with_unshipped_items' do
       it 'will return all invoices that do not have a status of completed' do
-
         expect(Invoice.invoices_with_unshipped_items).to eq([@invoice_1, @invoice_2, @invoice_3, @invoice_7, @invoice_8, @invoice_9])
-
       end
     end
 
@@ -94,7 +92,6 @@ RSpec.describe Invoice, type: :model do
 
     describe '#invoices_with_unshipped_items_oldest_to_newest' do
       it 'will return the invoices with the oldest created at dates first if they have unshipped items' do
-
         expect(Invoice.invoices_with_unshipped_items_oldest_to_newest).to eq([@invoice_9, @invoice_8, @invoice_7, @invoice_1, @invoice_2, @invoice_3])
       end
     end
@@ -117,8 +114,49 @@ RSpec.describe Invoice, type: :model do
 
     describe '#disc_rev' do
       it 'calculates the revenue after discounts' do
-        expect(@invoice_1.disc_rev).to eq(233)
-        expect(@invoice_2.disc_rev).to eq(13)
+        customer_1 = create(:customer)
+      
+        invoice_1 = create(:invoice, customer_id: customer_1.id, status: 0, created_at: "Wed, 21 Feb 2024 00:47:11.096539000 UTC +00:00")
+        invoice_2 = create(:invoice, customer_id: customer_1.id, status: 0, created_at: "Tues, 20 Feb 2024 00:47:11.096539000 UTC +00:00")
+        invoice_3 = create(:invoice, customer_id: customer_1.id, status: 0, created_at: "Mon, 19 Feb 2024 00:47:11.096539000 UTC +00:00")
+
+        trans_1 = create(:transaction, invoice_id: invoice_1.id)
+        trans_2 = create(:transaction, invoice_id: invoice_2.id)
+        trans_3 = create(:transaction, invoice_id: invoice_3.id)
+        
+        merchant_1 = create(:merchant, name: "Amazon") 
+
+        item_1 = create(:item, unit_price: 1, merchant_id: merchant_1.id)
+        item_2 = create(:item, unit_price: 1, merchant_id: merchant_1.id)
+        item_3 = create(:item, unit_price: 1, merchant_id: merchant_1.id)
+        item_4 = create(:item, unit_price: 1, merchant_id: merchant_1.id)
+        item_5 = create(:item, unit_price: 1, merchant_id: merchant_1.id)
+
+        invoice_item_1 = create(:invoice_item, item_id: item_1.id, invoice_id: invoice_1.id, quantity: 1, unit_price: 1300, status: 0)
+        invoice_item_2 = create(:invoice_item, item_id: item_2.id, invoice_id: invoice_2.id, quantity: 1, unit_price: 1300, status: 0)
+        invoice_item_3 = create(:invoice_item, item_id: item_3.id, invoice_id: invoice_3.id, quantity: 1, unit_price: 1300, status: 1)
+        invoice_item_4 = create(:invoice_item, item_id: item_4.id, invoice_id: invoice_1.id, quantity: 1, unit_price: 1300, status: 2)
+        invoice_item_5 = create(:invoice_item, item_id: item_5.id, invoice_id: invoice_2.id, quantity: 1, unit_price: 1300, status: 2)
+        invoice_item_6 = create(:invoice_item, item_id: item_5.id, invoice_id: invoice_3.id, quantity: 1, unit_price: 1300, status: 0)
+        invoice_item_7 = create(:invoice_item, item_id: item_5.id, invoice_id: invoice_1.id, quantity: 1, unit_price: 1300, status: 0)
+        invoice_item_8 = create(:invoice_item, item_id: item_5.id, invoice_id: invoice_2.id, quantity: 1, unit_price: 1300, status: 0)
+        invoice_item_9 = create(:invoice_item, item_id: item_5.id, invoice_id: invoice_3.id, quantity: 4, unit_price: 1000, status: 2)
+
+        discount_1 = merchant_1.discounts.create!(percent_discount: 50, quantity_threshold: 2)
+
+        expect(invoice_3.total_revenue).to eq(6600)
+        expect(invoice_3.items).to eq([item_3, item_5, item_5])
+        expect(invoice_3.disc_rev).to eq(4600)
+        
+        expect(invoice_2.total_revenue).to eq(3900)
+        expect(invoice_2.disc_rev).to eq(3900)
+      end
+    end
+
+    describe '#cents_to_dollars' do
+      it "converts cents to dollars" do 
+        expect(@invoice_1.cents_to_dollars).to eq(233)
+        expect(@invoice_2.cents_to_dollars).to eq(13)
       end
     end
   end

@@ -15,7 +15,7 @@ class MerchantItemsController < ApplicationController
 
   def update
     item = Item.find(params[:id])
-    if params[:status] == "0" || params[:status] == "1"
+    if params[:invoice_id]
       item.update(status: item_params[:status].to_i)
       redirect_to merchant_invoice_path(params[:merchant_id], params[:invoice_id])
     elsif params[:status]
